@@ -1,4 +1,5 @@
 'use client'
+import { formatedAccount } from '@/utils/functions';
 import React, { useState, useEffect } from 'react';
 
 export default function WalletConnect() {
@@ -41,7 +42,7 @@ export default function WalletConnect() {
     <div>
       {account ? (
         <div>
-          <p>{account}</p>
+          <p>{formatedAccount(account)}</p>
         </div>
       ) : (
         <button className='bg-blue-500 hover:bg-blue-700 text-white transition-all px-4 py-2 rounded-md' onClick={connectWallet}>Connect wallet</button>
