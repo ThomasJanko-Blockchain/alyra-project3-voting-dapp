@@ -10,7 +10,7 @@ export const connectToContract = async () => {
         const contractInstance = new ethers.Contract(contractAddress, contractABI, provider);
         console.log("✅ Contrat connecté :", contractInstance);
 
-        return contractInstance;
+        return {contractInstance, provider};
     } catch(error) {
         console.error("❌ Erreur de connexion au contrat :", error);
         return null;
