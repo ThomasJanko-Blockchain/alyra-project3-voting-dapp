@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { connectToContract } from "@/utils/functions";
+import { connectWithProdider, connectWithSigner } from "@/utils/functions";
 
 const statuses = [
   { label: "Enregistrement des électeurs", action: "startProposalsRegistering" },
@@ -13,7 +13,6 @@ const statuses = [
 ];
 
 export default function WorkflowManager() {
-  const [contract, setContract] = useState(null);
   const [workflowStatus, setWorkflowStatus] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -21,10 +20,9 @@ export default function WorkflowManager() {
     async function initContract() {
       if (window.ethereum) {
         try {
-          const { contractInstance } = await connectToContract()
+          const { contractInstance } = await connectWithProdider()
           const status = Number(await contractInstance.workflowStatus());
           
-          setContract(contractInstance);
           setWorkflowStatus(status);
         } catch (err) {
           console.error("Erreur d'initialisation:", err);
@@ -37,18 +35,19 @@ export default function WorkflowManager() {
 
   // Fonction pour avancer dans le workflow
   const advanceWorkflow = async () => {
-    console.log("Avancer dans le workflow", contract, statuses[workflowStatus].action);
-    if (!contract) return;
-    const action = statuses[workflowStatus].action;
-    if (!action) return;
-    
+   
     try {
+      const { contractInstance, signer } = await connectWithSigner()
+      if (!contractInstance) return;
+      console.log("Avancer dans le workflow", contractInstance, statuses[workflowStatus].action);
+      const action = statuses[workflowStatus].action;
+      if (!action) return;
       setIsLoading(true);
-      const tx = await contract[action]();
+      const tx = await contractInstance[action]();
       await tx.wait();
       
       // Mettre à jour manuellement le statut après la transaction
-      const newStatus = Number(await contract.workflowStatus());
+      const newStatus = Number(await contractInstance.workflowStatus());
       setWorkflowStatus(newStatus);
       setIsLoading(false);
     } catch (err) {
