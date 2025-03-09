@@ -1,8 +1,6 @@
 'use client'
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
-// import { Button } from "@/components/ui/button";
-import { contractAddress, contractABI } from "@/utils/constants";
+import { Button } from "@/components/ui/button";
 import { connectToContract } from "@/utils/functions";
 
 const statuses = [
@@ -67,13 +65,13 @@ export default function WorkflowManager() {
       </p>
       
       {workflowStatus < statuses.length - 1 && (
-        <button 
+        <Button 
           onClick={advanceWorkflow} 
           className="mt-4"
           disabled={isLoading}
         >
           {isLoading ? "En cours..." : `Passer à: ${statuses[workflowStatus + 1].label}`}
-        </button>
+        </Button>
       )}
     </div>
   );
