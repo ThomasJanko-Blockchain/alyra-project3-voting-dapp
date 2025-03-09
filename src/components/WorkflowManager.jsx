@@ -21,10 +21,10 @@ export default function WorkflowManager() {
     async function initContract() {
       if (window.ethereum) {
         try {
-          const _contract = await connectToContract()
-          const status = Number(await _contract.workflowStatus());
+          const { contractInstance } = await connectToContract()
+          const status = Number(await contractInstance.workflowStatus());
           
-          setContract(_contract);
+          setContract(contractInstance);
           setWorkflowStatus(status);
         } catch (err) {
           console.error("Erreur d'initialisation:", err);

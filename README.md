@@ -27,20 +27,20 @@
 
   
 
- - [ ] à l'administrateur de commencer la session de vote. (**Thomas**)
+ - [ ] à l'administrateur de commencer la session de vote. (**Emmanuel**)
 
   
 
  - [ ] aux électeurs inscrits de voter pour leurs propositions
-       préférées.  (**Emmanuel**)
+       préférées.  (**Thomas**)
 
   
 
- - [ ] à l'administrateur de mettre fin à la session de vote. (**Thomas**)
+ - [ ] à l'administrateur de mettre fin à la session de vote. (**Emmanuel**)
 
   
 
- - [ ] à l'administrateur de comptabiliser les votes.  (**Emmanuel**)
+ - [ ] à l'administrateur de comptabiliser les votes.  (**Thomas**)
 
   
 
