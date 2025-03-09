@@ -1,4 +1,5 @@
 import WalletConnect from "@/components/shared/WalletConnect";
+import WorkflowManager from "@/components/shared/WorkflowManager";
 
 export default function Home() {
   return (
@@ -6,6 +7,7 @@ export default function Home() {
       <div className="p-4">
         <WalletConnect />
       </div>
+      <WorkflowManager />
     </div>
   );
 }

@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { Button } from "@/components/ui/button";
-import { contractAddress } from "@/utils/constants";
+// import { Button } from "@/components/ui/button";
+import { contractAddress, contractABI } from "@/utils/constants";
+import { connectToContract } from "@/utils/functions";
 
 const statuses = [
   { label: "Enregistrement des électeurs", action: "startProposalsRegistering" },
@@ -22,20 +23,10 @@ export default function WorkflowManager() {
     async function initContract() {
       if (window.ethereum) {
         try {
-          const provider = new ethers.BrowserProvider(window.ethereum);
-          const signer = await provider.getSigner();
-          const abi = [ 
-            "function workflowStatus() public view returns (uint8)",
-            "function startProposalsRegistering() external",
-            "function endProposalsRegistering() external",
-            "function startVotingSession() external",
-            "function endVotingSession() external",
-            "function tallyVotes() external"
-          ];
-          const contract = new ethers.Contract(contractAddress, abi, signer);
-          const status = Number(await contract.workflowStatus());
+          const _contract = await connectToContract()
+          const status = Number(await _contract.workflowStatus());
           
-          setContract(contract);
+          setContract(_contract);
           setWorkflowStatus(status);
         } catch (err) {
           console.error("Erreur d'initialisation:", err);
@@ -48,8 +39,8 @@ export default function WorkflowManager() {
 
   // Fonction pour avancer dans le workflow
   const advanceWorkflow = async () => {
+    console.log("Avancer dans le workflow", contract, statuses[workflowStatus].action);
     if (!contract) return;
-    
     const action = statuses[workflowStatus].action;
     if (!action) return;
     
@@ -76,13 +67,13 @@ export default function WorkflowManager() {
       </p>
       
       {workflowStatus < statuses.length - 1 && (
-        <Button 
+        <button 
           onClick={advanceWorkflow} 
           className="mt-4"
           disabled={isLoading}
         >
           {isLoading ? "En cours..." : `Passer à: ${statuses[workflowStatus + 1].label}`}
-        </Button>
+        </button>
       )}
     </div>
   );
