@@ -1,6 +1,6 @@
 'use client'
 import React, { useState } from 'react';
-import { connectToContract } from '@/utils/functions';
+import {  connectWithSigner } from '@/utils/functions';
 
 const WhiteList = () => {
   const [voterAddress, setVoterAddress] = useState('');
@@ -16,12 +16,13 @@ const WhiteList = () => {
       return;
     }
 
-    const {contractInstance, provider} = await connectToContract();
-    const signer = provider.getSigner();
+    const { contractInstance, signer } = await connectWithSigner();
 
     try {
       const ownerAddress = await contractInstance.owner();
-      const userAddress = (await signer).getAddress();
+      const userAddress = await signer.getAddress();
+      console.log('ownerAddress', ownerAddress);
+      console.log('userAddress', userAddress);
 
       if (ownerAddress.toLowerCase() !== userAddress.toLowerCase()) {
         setStatus('Only the contract owner can register voters.');
@@ -30,7 +31,7 @@ const WhiteList = () => {
 
       const tx = await contractInstance.addVoter(voterAddress);
       setStatus('Transaction submitted. Waiting for confirmation...');
-      await tx.wait();
+      await tx.wait(1);
       setStatus(`Voter ${voterAddress} registered successfully.`);
       setVoterAddress('');
     } catch (error) {
