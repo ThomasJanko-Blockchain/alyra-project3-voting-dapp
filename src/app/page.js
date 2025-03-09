@@ -1,5 +1,6 @@
 import WalletConnect from "@/components/shared/WalletConnect";
-import WorkflowManager from "@/components/shared/WorkflowManager";
+import WhiteList from "@/components/WhiteList";
+import WorkflowManager from "@/components/WorkflowManager";
 
 export default function Home() {
   return (
@@ -7,7 +8,10 @@ export default function Home() {
       <div className="p-4">
         <WalletConnect />
       </div>
-      <WorkflowManager />
+      <div className="p-4 flex flex-col gap-4 justify-center items-center">
+        <WorkflowManager />
+        <WhiteList />
+      </div>
     </div>
   );
 }
