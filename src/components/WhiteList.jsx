@@ -1,10 +1,11 @@
 'use client'
 import React, { useState } from 'react';
 import {  connectWithSigner } from '@/utils/functions';
+import toast from 'react-hot-toast';
+import { ethers } from 'ethers';
 
 const WhiteList = () => {
   const [voterAddress, setVoterAddress] = useState('');
-  const [status, setStatus] = useState('');
 
   const handleInputChange = (e) => {
     setVoterAddress(e.target.value);
@@ -12,7 +13,13 @@ const WhiteList = () => {
 
   const registerVoter = async () => {
     if (!window.ethereum) {
-      setStatus('MetaMask is not installed.');
+      toast.error('MetaMask is not installed.');
+      return;
+    }
+
+    //check valid address
+    if (!isValidAddress(voterAddress)) {
+      toast.error('Invalid Ethereum address.');
       return;
     }
 
@@ -21,22 +28,25 @@ const WhiteList = () => {
     try {
       const ownerAddress = await contractInstance.owner();
       const userAddress = await signer.getAddress();
-      console.log('ownerAddress', ownerAddress);
-      console.log('userAddress', userAddress);
 
       if (ownerAddress.toLowerCase() !== userAddress.toLowerCase()) {
-        setStatus('Only the contract owner can register voters.');
+        toast.error('Only the contract owner can register voters.');
         return;
       }
 
       const tx = await contractInstance.addVoter(voterAddress);
-      setStatus('Transaction submitted. Waiting for confirmation...');
+      toast.success('Transaction submitted. Waiting for confirmation...');
       await tx.wait(1);
-      setStatus(`Voter ${voterAddress} registered successfully.`);
       setVoterAddress('');
+      toast.success(`Voter ${voterAddress} registered successfully.`);
     } catch (error) {
-      setStatus(`Error: ${error.message}`);
+      console.log('error', error.message);
+      toast.error(error.message);
     }
+  };
+
+  const isValidAddress = (address) => {
+    return ethers.isAddress(address);
   };
 
   return (
@@ -55,7 +65,6 @@ const WhiteList = () => {
       >
         Register Voter
       </button>
-      {status && <p className="mt-4 text-red-500">{status}</p>}
     </div>
   );
 };
