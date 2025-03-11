@@ -8,9 +8,10 @@ export const connectWithProdider = async () => {
         }
         const provider = new ethers.BrowserProvider(window.ethereum);
         const contractInstance = new ethers.Contract(contractAddress, contractABI, provider);
-        console.log("✅ Contrat connecté :", contractInstance);
+        const owner = await contractInstance.owner();
+        // console.log("✅ Contrat connecté :", contractInstance);
 
-        return {contractInstance, provider};
+        return {contractInstance, provider, owner};
     } catch(error) {
         console.error("❌ Erreur de connexion au contrat :", error);
         return null;
@@ -25,7 +26,7 @@ export const connectWithSigner = async () => {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const contractInstance = new ethers.Contract(contractAddress, contractABI, signer);
-        console.log("✅ Contrat connecté :", contractInstance);
+        // console.log("✅ Contrat connecté :", contractInstance);
         
         return { contractInstance, signer, provider };
     } catch(error) {
@@ -36,6 +37,11 @@ export const connectWithSigner = async () => {
 
 export const formatedAccount = (account) => {
     return account.slice(0, 6) + "..." + account.slice(-4);
+}
+
+export const checkIsOwner = async (address) => {
+    const { owner } = await connectWithProdider();
+    return owner.toLowerCase() === address.toLowerCase();
 }
 
 

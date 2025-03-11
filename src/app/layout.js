@@ -3,6 +3,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import '@rainbow-me/rainbowkit/styles.css';
 import Providers from "./providers";
+import NavBar from "@/components/layouts/NavBar";
 
 
 const geistSans = localFont({
@@ -25,9 +26,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen gradient-bg-welcome`}
       >
           <Providers>
+            <NavBar />
             {children}
           </Providers>
         <Toaster
