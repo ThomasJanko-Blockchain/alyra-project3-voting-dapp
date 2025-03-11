@@ -38,6 +38,8 @@ export default function RootLayout({ children }) {
               borderRadius: '10px',
               background: '#333',
               color: '#fff',
+              maxWidth: '800px', // Add max width to prevent text overflow
+              wordBreak: 'break-word' // Allow text to wrap
             },
             success: {
               duration: 3000,
