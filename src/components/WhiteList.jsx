@@ -34,7 +34,7 @@ const WhiteList = () => {
       contractInstance.on("VoterRegistered", (voterAddress) => {
         console.log("New Voter Registered:", voterAddress);
         setVoters((prevVoters) => [...prevVoters, voterAddress]);
-        toast.success(`Voter ${voterAddress} registered successfully.`);
+        // toast.success(`Voter ${voterAddress} registered successfully.`);
       });
     }
 
@@ -82,6 +82,7 @@ const WhiteList = () => {
       toast.success('Transaction submitted. Waiting for confirmation...');
       await tx.wait(1);
       setVoterAddress('');
+      toast.success(`Voter ${voterAddress} registered successfully.`);
     } catch (error) {
       console.log('error', error.message);
       toast.error(error.message);
@@ -93,8 +94,8 @@ const WhiteList = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-5 border rounded shadow">
-      <h1 className="text-2xl font-bold mb-4">Register Voter</h1>
+    <div className="mx-auto mt-10 p-5 border rounded shadow">
+      <h1 className="text-2xl font-bold mb-4 text-center">Register Voter</h1>
       <input
         type="text"
         value={voterAddress}
@@ -110,12 +111,12 @@ const WhiteList = () => {
       </button>
 
       {/* Display registered voters */}
-      <h2 className="text-xl font-bold mt-6">Registered Voters</h2>
-      <ul className="list-disc pl-5">
+      <h2 className="text-xl font-bold mt-10">Registered Voters</h2>
+      <ul className="list-disc pl-5 mt-2 flex flex-col gap-y-2 max-h-[200px] overflow-y-auto overflow-x-hidden">
         {voters.length > 0 ? (
-          voters.map((voter, index) => (
-            <li key={index} className="">
-              {voter}
+          voters.map((voter) => (
+            <li key={voter} className="rounded-full border-white border-2 w-fit px-2 py-1">
+              {(voter)}
             </li>
           ))
         ) : (
