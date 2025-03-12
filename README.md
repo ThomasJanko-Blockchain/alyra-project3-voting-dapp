@@ -9,16 +9,16 @@
 
 **Votre Dapp doit permettre :**
 
- - [ ] l’enregistrement d’une liste blanche d'électeurs. (**Thomas**)
+ - [X] l’enregistrement d’une liste blanche d'électeurs. (**Thomas**)
 
   
 
- - [ ] à l'administrateur de commencer la session d'enregistrement de la
+ - [X] à l'administrateur de commencer la session d'enregistrement de la
        proposition. (**Emmanuel**)
 
   
 
- - [ ] aux électeurs inscrits d’enregistrer leurs propositions. (**Thomas**)
+ - [X] aux électeurs inscrits d’enregistrer leurs propositions. (**Thomas**)
 
   
 
