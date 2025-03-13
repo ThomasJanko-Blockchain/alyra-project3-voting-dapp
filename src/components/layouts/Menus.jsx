@@ -6,6 +6,7 @@ import { useAccount } from 'wagmi'
 import { checkIsOwner } from '@/utils/functions'
 import { useEffect, useState } from 'react'
 import Voting from '../Voting'
+import Results from '../Results'
 
 
 const menus = [
@@ -29,11 +30,11 @@ const menus = [
         component: <Voting />,
         onlyOwner: false
     },
-    // {
-    //     name: 'Results',
-    //     component: <Results />,
-    //     onlyOwner: false
-    // }
+    {
+        name: 'Results',
+        component: <Results />,
+        onlyOwner: false
+    }
 ]
 
 export default function Menus() {

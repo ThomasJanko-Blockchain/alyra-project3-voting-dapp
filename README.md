@@ -31,7 +31,7 @@
 
   
 
- - [ ] aux électeurs inscrits de voter pour leurs propositions
+ - [X] aux électeurs inscrits de voter pour leurs propositions
        préférées.  (**Thomas**)
 
   
