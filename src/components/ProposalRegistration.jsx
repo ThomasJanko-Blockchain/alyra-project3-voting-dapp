@@ -1,80 +1,82 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import { connectWithSigner } from '@/utils/functions';
 import toast from 'react-hot-toast';
+import React, { useState, useEffect } from 'react';
+import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
+import { contractABI, contractAddress } from '@/utils/constants';
+import { publicClient } from '@/utils/client';
+import { parseAbiItem } from 'viem';
 
 export default function ProposalRegistration() {
+    const { address } = useAccount();
     const [proposal, setProposal] = useState('');
-    const [proposals, setProposals] = useState([]); // Store registered proposals
+    const [proposalsList, setProposalsList] = useState([]);
 
-    // Fetch proposals from the blockchain when the component loads
+    const { data: hash, error, isPending: setIsPending, writeContract } = useWriteContract({});
+    const { isLoading: isConfirming, isSuccess, error: errorConfirmation } = useWaitForTransactionReceipt({hash})
+
+
     useEffect(() => {
-        async function fetchProposals() {
-            try {
-                const { contractInstance } = await connectWithSigner();
-                const filter = contractInstance.filters.ProposalRegistered();
-                const events = await contractInstance.queryFilter(filter);
-
-                // Retrieve all proposals from emitted events
-                const registeredProposals = await Promise.all(
-                    events.map(async (event) => {
-                        const proposalId = event.args.proposalId.toString(); // Get proposal ID
-                        const proposalData = await contractInstance.getOneProposal(proposalId);
-                        return proposalData.description;
-                    })
-                );
-
-                setProposals(registeredProposals);
-            } catch (error) {
-                console.error("Error fetching proposals:", error);
-                toast.error("Failed to fetch proposals.");
-            }
+       const getAllEvents = async () => {
+        if (address !== undefined) {
+            await getEvents();
         }
+       }
+       getAllEvents();
+    }, [address])
 
-        async function listenForProposalEvents() {
-            const { contractInstance } = await connectWithSigner();
-            if (!contractInstance) {
-                console.error("Contract instance is undefined");
-                return;
-            }
-
-            contractInstance.on("ProposalRegistered", async (proposalId) => {
-                console.log("New Proposal Registered:", proposalId);
-                const proposalData = await contractInstance.getOneProposal(proposalId.toString());
-                setProposals((prevProposals) => [...prevProposals, proposalData.description]);
-                toast.success(`Proposal registered successfully.`);
+    const getEvents = async () => {
+        const proposalsChangedLog = await publicClient.getLogs({
+            address: contractAddress,
+            event: parseAbiItem('event ProposalRegistered(uint proposalId)'),
+            fromBlock: 0n,
+            toBlock: 'latest',
+        });
+    
+        const proposalsEvents = await Promise.all(proposalsChangedLog.map(async (log) => {
+            const proposal = await publicClient.readContract({
+                address: contractAddress,
+                abi: contractABI,
+                functionName: 'getOneProposal',
+                args: [log.args.proposalId],
+                account: address
             });
-        }
 
-        fetchProposals();
-        listenForProposalEvents();
+            return proposal;
+        }));
+        console.log(proposalsEvents);
+        setProposalsList(proposalsEvents);
+    };
 
-        return () => {
-            async function removeListener() {
-                const { contractInstance } = await connectWithSigner();
-                if (contractInstance) {
-                    contractInstance.removeAllListeners("ProposalRegistered");
-                }
-            }
-            removeListener();
-        };
-    }, []);
 
     const handleSubmit = async () => {
         if (!proposal) {
             toast.error('Proposal is required.');
             return;
         }
-        try {
-            const { contractInstance, signer } = await connectWithSigner();
-            const tx = await contractInstance.addProposal(proposal);
-            toast.success('Proposal submitted. Waiting for confirmation...');
-            await tx.wait(1);
-            setProposal('');
-        } catch (error) {
-            toast.error(error.message);
-        }
+        writeContract({
+            address: contractAddress,
+            abi: contractABI,
+            functionName: 'addProposal',
+            args: [proposal],
+        });
+        
     };
+
+    useEffect(() => {
+        if (errorConfirmation) {
+            toast.error((errorConfirmation.shortMessage || errorConfirmation.message));
+        }
+        if (isSuccess) {
+            toast.success('Proposal registered successfully.');
+        }
+
+        if (error) {
+            toast.error((error.shortMessage || error.message));
+        }
+        
+    }, [errorConfirmation, isSuccess, error]);
+
+
 
     return (
         <div className="max-w-md mx-auto mt-10 p-5 border rounded shadow">
@@ -88,18 +90,19 @@ export default function ProposalRegistration() {
             />
             <button
                 onClick={handleSubmit}
+                disabled={setIsPending}
                 className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-700"
             >
-                Register Proposal
+                {setIsPending ? 'Registering...' : 'Register Proposal'}
             </button>
 
-            {/* Display the list of proposals */}
+
             <h2 className="text-xl font-bold mt-6">Registered Proposals</h2>
             <ul className="list-disc pl-5">
-                {proposals.length > 0 ? (
-                    proposals.map((proposal, index) => (
-                        <li key={index} className="">
-                            {proposal}
+                {proposalsList.length > 0 ? (
+                    proposalsList.map((proposal, index) => (
+                        <li key={crypto.randomUUID()} className="">
+                            {proposal.description}
                         </li>
                     ))
                 ) : (
