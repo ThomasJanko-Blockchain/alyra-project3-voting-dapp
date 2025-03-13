@@ -1,11 +1,11 @@
-'use client'
-import React, { useState, useEffect } from 'react';
 import { connectWithSigner } from '@/utils/functions';
+import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 
-export default function ProposalRegistration() {
-    const [proposal, setProposal] = useState('');
-    const [proposals, setProposals] = useState([]); // Store registered proposals
+export default function Voting() {
+
+    const [proposals, setProposals] = useState([])
+    const [hoveredIndex, setHoveredIndex] = useState(null);
 
     // Fetch proposals from the blockchain when the component loads
     useEffect(() => {
@@ -60,52 +60,44 @@ export default function ProposalRegistration() {
         };
     }, []);
 
-    const handleSubmit = async () => {
-        if (!proposal) {
-            toast.error('Proposal is required.');
-            return;
-        }
+    const handleClick = async (proposalId) => {
         try {
             const { contractInstance } = await connectWithSigner();
-            const tx = await contractInstance.addProposal(proposal);
-            toast.success('Proposal submitted. Waiting for confirmation...');
-            await tx.wait(1);
-            setProposal('');
+            const tx = await contractInstance.setVote(proposalId);
+            await tx.wait();
+            toast.success("Vote submitted successfully.");
         } catch (error) {
             toast.error(error.message);
         }
-    };
-
-    return (
-        <div className="max-w-md mx-auto mt-10 p-5 border rounded shadow">
-            <h1 className="text-2xl font-bold mb-4">Register Proposal</h1>
-            <input
-                type="text"
-                value={proposal}
-                onChange={(e) => setProposal(e.target.value)}
-                placeholder="Enter proposal"
-                className="w-full p-2 border rounded mb-4 text-black"
-            />
-            <button
-                onClick={handleSubmit}
-                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-700"
-            >
-                Register Proposal
-            </button>
-
-            {/* Display the list of proposals */}
-            <h2 className="text-xl font-bold mt-6">Registered Proposals</h2>
-            <ul className="list-disc pl-5">
-                {proposals.length > 0 ? (
-                    proposals.map((proposal, index) => (
-                        <li key={crypto.randomUUID()} className="py-1 text-lg list-decimal cursor-pointer px-2">
-                            {proposal}
-                        </li>
-                    ))
-                ) : (
-                    <p>No proposals registered yet.</p>
-                )}
-            </ul>
+    }
+    
+    
+  return (
+    <div>
+       <h1 className="text-2xl font-bold mb-4 text-center">Voting</h1>
+        <div className='flex flex-col gap-4 outline outline-1 outline-gray-300 rounded-md p-8'>
+        <ul className="list-decimal space-y-2">
+        {proposals.map((proposal, index) => (
+          <li
+            key={crypto.randomUUID()}
+            className="relative p-2 rounded-md transition-colors duration-200 cursor-pointer hover:bg-purple-100 hover:text-purple-500"
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            {proposal}
+            {hoveredIndex === index && (
+              <button
+                onClick={() => handleClick(index)}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-2 py-1 rounded-md shadow-md transition-transform duration-200 hover:scale-105"
+              >
+                Vote
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
         </div>
-    );
+    </div>
+  )
 }
+

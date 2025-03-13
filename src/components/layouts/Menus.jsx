@@ -5,6 +5,7 @@ import ProposalRegistration from '../ProposalRegistration'
 import { useAccount } from 'wagmi'
 import { checkIsOwner } from '@/utils/functions'
 import { useEffect, useState } from 'react'
+import Voting from '../Voting'
 
 
 const menus = [
@@ -23,11 +24,11 @@ const menus = [
         component: <ProposalRegistration />,
         onlyOwner: false
     },
-    // {
-    //     name: 'Voting',
-    //     component: <Voting />,
-    //     onlyOwner: false
-    // },
+    {
+        name: 'Voting',
+        component: <Voting />,
+        onlyOwner: false
+    },
     // {
     //     name: 'Results',
     //     component: <Results />,
@@ -40,6 +41,7 @@ export default function Menus() {
     const { address } = useAccount()
     const [isOwner, setIsOwner] = useState(false)
     const [activeMenu, setActiveMenu] = useState(null)
+    
 
     useEffect(() => {
         if (!address) return
