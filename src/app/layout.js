@@ -29,28 +29,31 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen gradient-bg-welcome`}
       >
           <Providers>
-            <NavBar />
-            {children}
+            <div className="flex flex-col min-h-screen">
+              <NavBar />
+              <div className="flex-grow p-5">{children}</div>
+            </div>
+            <Toaster
+            position="top-center"
+            reverseOrder={false}
+            toastOptions={{
+              style: {
+                borderRadius: '10px',
+                background: '#333',
+                color: '#fff',
+                maxWidth: '800px', // Add max width to prevent text overflow
+                wordBreak: 'break-word' // Allow text to wrap
+              },
+              success: {
+                duration: 3000,
+              },
+              error: {
+                duration: 3000,
+              },
+            }}
+          />
           </Providers>
-        <Toaster
-          position="top-center"
-          reverseOrder={false}
-          toastOptions={{
-            style: {
-              borderRadius: '10px',
-              background: '#333',
-              color: '#fff',
-              maxWidth: '800px', // Add max width to prevent text overflow
-              wordBreak: 'break-word' // Allow text to wrap
-            },
-            success: {
-              duration: 3000,
-            },
-            error: {
-              duration: 3000,
-            },
-          }}
-        />
+          
       </body>
     </html>
   );

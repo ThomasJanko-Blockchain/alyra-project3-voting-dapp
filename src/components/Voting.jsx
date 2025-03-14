@@ -1,82 +1,95 @@
-import { connectWithSigner } from '@/utils/functions';
-import React, { useEffect, useState } from 'react'
+'use client'
+import { publicClient } from '@/utils/client';
+import { contractABI, contractAddress } from '@/utils/constants';
+import { useEffect, useState } from 'react'
+import { readContract } from 'viem/actions';
+import { useAccount, useWaitForTransactionReceipt, useWatchContractEvent, useWriteContract } from 'wagmi';
 import toast from 'react-hot-toast';
 
-export default function Voting() {
-
+export default function Voting({ proposalsEvents }) {
+    const { address } = useAccount()
     const [proposals, setProposals] = useState([])
     const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [numberProposals, setNumberProposals] = useState(0);
 
-    // Fetch proposals from the blockchain when the component loads
-    useEffect(() => {
-        async function fetchProposals() {
-            try {
-                const { contractInstance } = await connectWithSigner();
-                const filter = contractInstance.filters.ProposalRegistered();
-                const events = await contractInstance.queryFilter(filter);
+    const { data: hash, error, isPending, writeContract } = useWriteContract()
+    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({hash})
 
-                // Retrieve all proposals from emitted events
-                const registeredProposals = await Promise.all(
-                    events.map(async (event) => {
-                        const proposalId = event.args.proposalId.toString(); // Get proposal ID
-                        const proposalData = await contractInstance.getOneProposal(proposalId);
-                        return proposalData.description;
-                    })
-                );
 
-                setProposals(registeredProposals);
-            } catch (error) {
-                console.error("Error fetching proposals:", error);
-                toast.error("Failed to fetch proposals.");
-            }
-        }
+    useWatchContractEvent({
+      address: contractAddress,
+      abi: contractABI,
+      eventName: 'ProposalRegistered',
+      onLogs(log) {
+          console.log('ProposalRegistered event triggered', log[0].args.proposalId.toString())
+          setNumberProposals(log[0].args.proposalId.toString())
+      },
+    })
 
-        async function listenForProposalEvents() {
-            const { contractInstance } = await connectWithSigner();
-            if (!contractInstance) {
-                console.error("Contract instance is undefined");
-                return;
-            }
+    const fetchProposals = async () => {
 
-            contractInstance.on("ProposalRegistered", async (proposalId) => {
-                console.log("New Proposal Registered:", proposalId);
-                const proposalData = await contractInstance.getOneProposal(proposalId.toString());
-                setProposals((prevProposals) => [...prevProposals, proposalData.description]);
-                toast.success(`Proposal registered successfully.`);
-            });
-        }
+      //get all proposals from numberProposals to 0
+     if(numberProposals > 0) {
+      let results = []
+      for(let i = 1; i <= numberProposals; i++) {
+          const proposal = await readContract(publicClient, {
+              abi: contractABI,
+              address: contractAddress,
+              functionName: 'getOneProposal',
+              args: [i],
+              account: address
+          })
+          results.push(proposal)
+      }
+      console.table(results)
+      setProposals(results)
 
-        fetchProposals();
-        listenForProposalEvents();
+     }
+  };
 
-        return () => {
-            async function removeListener() {
-                const { contractInstance } = await connectWithSigner();
-                if (contractInstance) {
-                    contractInstance.removeAllListeners("ProposalRegistered");
-                }
-            }
-            removeListener();
-        };
-    }, []);
+  useEffect(() => {
+      console.log('fetching proposals', numberProposals)
+      if (proposalsEvents.length > 0) {
+        setNumberProposals(proposalsEvents.length)
+      }
+      if (address) {
+          fetchProposals();
+      }
+  }, [numberProposals, proposalsEvents, address]);
+
+
 
     const handleClick = async (proposalId) => {
         try {
-            const { contractInstance } = await connectWithSigner();
-            const tx = await contractInstance.setVote(proposalId);
-            await tx.wait();
-            toast.success("Vote submitted successfully.");
+            writeContract({
+                address: contractAddress,
+                abi: contractABI,
+                functionName: 'setVote',
+                args: [proposalId],
+                account: address
+            })
         } catch (error) {
             toast.error(error.message);
         }
     }
-    
+
+    useEffect(() => {
+        if (isConfirmed) {
+            toast.success(`Transaction successful. 
+            Hash: ${hash}`)
+        }
+        if (error) {
+            toast.error(error.shortMessage || error.message);
+        }
+        
+
+    }, [isConfirmed, error, isConfirming])
     
   return (
     <div>
        <h1 className="text-2xl font-bold mb-4 text-center">Voting</h1>
         <div className='flex flex-col gap-4 outline outline-1 outline-gray-300 rounded-md p-8'>
-        <ul className="list-decimal space-y-2">
+        <ul className="list-decimal space-y-2 max-h-[400px] overflow-y-auto">
         {proposals.map((proposal, index) => (
           <li
             key={crypto.randomUUID()}
@@ -84,7 +97,7 @@ export default function Voting() {
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
-            {proposal}
+            {proposal.description}
             {hoveredIndex === index && (
               <button
                 onClick={() => handleClick(index)}

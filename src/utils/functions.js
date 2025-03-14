@@ -35,9 +35,6 @@ export const connectWithSigner = async () => {
     }
 }
 
-export const formatedAccount = (account) => {
-    return account.slice(0, 6) + "..." + account.slice(-4);
-}
 
 export const checkIsOwner = async (address) => {
     const { owner } = await connectWithProdider();

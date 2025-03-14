@@ -1,56 +1,16 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import { connectWithSigner } from '@/utils/functions';
+import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
+import { contractABI, contractAddress } from '@/utils/constants';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { ethers } from 'ethers';
 
-const WhiteList = () => {
+const WhiteList = ({ votersEvents }) => {
   const [voterAddress, setVoterAddress] = useState('');
   const [voters, setVoters] = useState([]); // Store registered voters
+  const { address } = useAccount()
 
-  useEffect(() => {
-    async function fetchVoters() {
-      try {
-        const { contractInstance } = await connectWithSigner();
-        const filter = contractInstance.filters.VoterRegistered();
-        const events = await contractInstance.queryFilter(filter);
-        
-        const registeredVoters = events.map(event => event.args.voterAddress);
-        setVoters(registeredVoters);
-      } catch (error) {
-        console.error("Error fetching voters:", error);
-        toast.error("Failed to fetch registered voters.");
-      }
-    }
+  const { data: hash, error, isPending, writeContract } = useWriteContract()
 
-    async function listenForEvents() {
-      const { contractInstance } = await connectWithSigner();
-
-      if (!contractInstance) {
-        console.error('Contract instance is undefined');
-        return;
-      }
-
-      contractInstance.on("VoterRegistered", (voterAddress) => {
-        console.log("New Voter Registered:", voterAddress);
-        setVoters((prevVoters) => [...prevVoters, voterAddress]);
-        // toast.success(`Voter ${voterAddress} registered successfully.`);
-      });
-    }
-
-    fetchVoters();
-    listenForEvents();
-
-    return () => {
-      async function removeListener() {
-        const { contractInstance } = await connectWithSigner();
-        if (contractInstance) {
-          contractInstance.removeAllListeners("VoterRegistered");
-        }
-      }
-      removeListener();
-    };
-  }, []);
 
   const handleInputChange = (e) => {
     setVoterAddress(e.target.value);
@@ -61,41 +21,47 @@ const WhiteList = () => {
       toast.error('MetaMask is not installed.');
       return;
     }
-
-    if (!isValidAddress(voterAddress)) {
-      toast.error('Invalid Ethereum address.');
-      return;
-    }
-
-    const { contractInstance, signer } = await connectWithSigner();
-
+    
     try {
-      const ownerAddress = await contractInstance.owner();
-      const userAddress = await signer.getAddress();
-
-      if (ownerAddress.toLowerCase() !== userAddress.toLowerCase()) {
-        toast.error('Only the contract owner can register voters.');
-        return;
-      }
-
-      const tx = await contractInstance.addVoter(voterAddress);
-      toast.success('Transaction submitted. Waiting for confirmation...');
-      await tx.wait(1);
-      setVoterAddress('');
-      toast.success(`Voter ${voterAddress} registered successfully.`);
+      writeContract({
+        address: contractAddress,
+        abi: contractABI,
+        functionName: 'addVoter',
+        args: [voterAddress],
+        account: address
+      })
     } catch (error) {
       console.log('error', error.message);
-      toast.error(error.message);
     }
   };
 
-  const isValidAddress = (address) => {
-    return ethers.isAddress(address);
-  };
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({hash})
 
+  useEffect(() => {
+    if (isConfirmed) {
+        toast.success(`Transaction successful. 
+          Hash: ${hash}`)
+        setVoterAddress('')
+    }
+    if (error) {
+      toast.error(error.shortMessage || error.message)
+    }
+}, [isConfirmed, error])
+
+  useEffect(() => {
+    console.log('votersEvents', votersEvents)
+    if (votersEvents) {
+      setVoters(votersEvents.map((event) => event.args.voterAddress))
+    }
+  }, [votersEvents])
+
+  
   return (
     <div className="mx-auto mt-10 p-5 border rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-center">Register Voter</h1>
+      <div className='flex flex-col gap-y-2 my-2'>
+        {isConfirming && <div>Waiting for confirmation...</div>}
+      </div>
       <input
         type="text"
         value={voterAddress}
@@ -104,10 +70,11 @@ const WhiteList = () => {
         className="w-full p-2 border rounded mb-4 text-black"
       />
       <button
+        disabled={isPending}
         onClick={registerVoter}
         className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-700"
       >
-        Register Voter
+        {isPending ? 'Registering...' : 'Register Voter'}
       </button>
 
       {/* Display registered voters */}
