@@ -22,12 +22,12 @@
 
   
 
- - [ ] à l'administrateur de mettre fin à la session d'enregistrement
+ - [X] à l'administrateur de mettre fin à la session d'enregistrement
        des propositions.  (**Emmanuel**)
 
   
 
- - [ ] à l'administrateur de commencer la session de vote. (**Emmanuel**)
+ - [X] à l'administrateur de commencer la session de vote. (**Emmanuel**)
 
   
 
@@ -36,15 +36,15 @@
 
   
 
- - [ ] à l'administrateur de mettre fin à la session de vote. (**Emmanuel**)
+ - [X] à l'administrateur de mettre fin à la session de vote. (**Emmanuel**)
 
   
 
- - [ ] à l'administrateur de comptabiliser les votes.  (**Thomas**)
+ - [X] à l'administrateur de comptabiliser les votes.  (**Thomas**)
 
   
 
- - [ ] à tout le monde de consulter le résultat. (**Thomas**)
+ - [X] à tout le monde de consulter le résultat. (**Thomas**)
 
   
   
@@ -78,12 +78,17 @@
 
 
 
-
 # RENDU
 
+
 **Vidéo de démo :**
-<iframe width="560" height="315" src="./video.mp4" frameborder="0" allowfullscreen></iframe>
+
+<iframe  width="560"  height="315"  src="./video.mp4"  frameborder="0"  allowfullscreen></iframe>
+
 [Regarder la vidéo](https://github.com/ThomasJanko-Blockchain/alyra-project3-voting-dapp/blob/main/video.mp4)
 
+  
+
 **Déploiment de la dApp sur Vercel :**
+
 [Voting dApp](https://alyra-project3-voting-dapp.vercel.app/)
