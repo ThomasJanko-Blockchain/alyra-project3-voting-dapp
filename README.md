@@ -83,7 +83,10 @@
 
 **Vidéo de démo :**
 
-<iframe  width="560"  height="315"  src="./video.mp4"  frameborder="0"  allowfullscreen></iframe>
+<video width="600" controls>
+  <source src="./video.mp4" type="video/mp4">
+  Votre navigateur ne supporte pas la vidéo.
+</video>
 
 [Regarder la vidéo](https://github.com/ThomasJanko-Blockchain/alyra-project3-voting-dapp/blob/main/video.mp4)
 
