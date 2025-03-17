@@ -75,3 +75,15 @@
   
 
 - Le lien vers un déploiement public de votre dapp (de préférence Vercel, mais ok pour Heroku, GhPages, Netlify, AWS, ovh, digital ocean... ).
+
+
+
+
+# RENDU
+
+**Vidéo de démo :**
+<iframe width="560" height="315" src="./video.mp4" frameborder="0" allowfullscreen></iframe>
+[Regarder la vidéo](https://github.com/ThomasJanko-Blockchain/alyra-project3-voting-dapp/blob/main/video.mp4)
+
+**Déploiment de la dApp sur Vercel :**
+[Voting dApp](https://alyra-project3-voting-dapp.vercel.app/)
